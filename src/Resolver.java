@@ -1,25 +1,27 @@
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public final class Resolver {
     Console console;
     String basePath;
-    HashMap<String, String> graph;
-    ArrayList<Pair<String, String>> allFiles;
+    String resultFile;
+    final String regex = "require ‘(.*)’";
+    DirectedGraph graph;
     ArrayList<String> loops;
 
     public Resolver(Console c) {
         console = c;
         console.write("Enter base path: ");
         basePath = console.readLine();
-        allFiles = new ArrayList<>();
+        console.write("Enter result file name: ");
+        resultFile = concat(basePath, console.readLine());
         loops = new ArrayList<>();
-        graph = new HashMap<>();
+        graph = new DirectedGraph();
     }
 
     public void resolve() {
@@ -38,30 +40,108 @@ public final class Resolver {
             return;
         }
         traverseFiles(files);
-        for (var file: allFiles) {
+        for (var file : graph.getVertices()) {
             parseFile(file);
         }
         if (!checkForLoops()) {
             console.writeLine("Found loops: ");
-            for (var s: loops) {
+            for (var s : loops) {
                 console.writeLine(s);
             }
+        }
+        for (var v: graph.getVertices()) {
+            console.write(v.getPath() + " => [");
+            for (var n: v.getAdjacencyList()) {
+                console.write(n.getPath() + ", ");
+            }
+            console.writeLine("]");
+        }
+        HashSet<String> allDependencies = new HashSet<>();
+        for (var v: graph.getVertices()) {
+            for (var n: v.getAdjacencyList()) {
+                allDependencies.add(n.getPath());
+            }
+        }
+        for (var v: graph.getVertices()) {
+            if (allDependencies.contains(v.getPath())) {
+                continue;
+            }
+            createResultFile(v);
+        }
+    }
+
+    private void createResultFile(Vertex v) {
+        try {
+            File file = new File(resultFile);
+            if (file.createNewFile()) {
+                console.writeLine("Creating file: " + resultFile);
+            } else {
+                console.writeLine("File already exists: " + resultFile);
+            }
+
+            File mainFile = new File(v.getPath());
+            try (Scanner reader = new Scanner(mainFile); FileWriter writer = new FileWriter(resultFile)) {
+                int index = 0;
+                while (reader.hasNextLine()) {
+                    String data = reader.nextLine();
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(data);
+                    if (m.matches()) {
+                        writeOtherFileContent(v, writer, index);
+                        index++;
+                    } else {
+                        writer.write(data + "\n");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            console.writeLine("Failed to create/open file!");
         }
     }
 
     private boolean checkForLoops() {
-        for(var k: graph.keySet()) {
-            console.writeLine(k + " => " + graph.get(k));
+        return !graph.hasCycle();
+    }
+
+    private void writeOtherFileContent(Vertex v, FileWriter writer, int idx) {
+        console.writeLine("Recursive call from: " + v.getPath());
+        Vertex dep = v.getAdjacencyList().get(idx);
+        if (dep.getAdjacencyList().isEmpty()) {
+            try (Scanner reader = new Scanner(new File(dep.getPath()))) {
+                while (reader.hasNextLine()) {
+                    writer.write(reader.nextLine() + "\n");
+                }
+            } catch (IOException e) {
+                console.writeLine("Failed to create/open file!");
+            }
+        } else {
+            try (Scanner reader = new Scanner(new File(dep.getPath()))) {
+                int index = 0;
+                while (reader.hasNextLine()) {
+                    String data = reader.nextLine();
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(data);
+                    if (m.matches()) {
+
+                        writeOtherFileContent(dep, writer, index);
+                        index++;
+                    } else {
+                        writer.write(data + "\n");
+                    }
+                }
+            } catch (IOException e) {
+                console.writeLine("Failed to create/open file!");
+            }
         }
-        return false;
     }
 
     private void traverseFiles(File[] files) {
-        for (var file: files) {
+        for (var file : files) {
             if (file.isDirectory()) {
                 traverseFiles(file.listFiles());
             } else {
-                allFiles.add(new Pair<>(file.getParent(), file.getName()));
+                Vertex v = new Vertex(file.getPath());
+                graph.addVertex(v);
             }
         }
     }
@@ -70,22 +150,26 @@ public final class Resolver {
         return path + File.separator + file;
     }
 
-    private void parseFile(Pair<String, String> file) {
-        String openPath = concat(file.first(), file.second());
-        File openFile = new File(openPath);
+    private void parseFile(Vertex file) {
+        File openFile = new File(file.getPath());
         if (!openFile.canRead())
             return;
         try {
-            Scanner fs = new Scanner(openFile);
-            while (fs.hasNextLine()) {
-                String data = fs.nextLine();
-                Pattern p = Pattern.compile("require ‘(.*)’");
-                Matcher m = p.matcher(data);
-                if (m.matches()) {
-                    String path = m.group(1);
-                    File testFile = new File(concat(basePath, path));
-                    if (testFile.exists() && testFile.isFile()) {
-                        graph.put(openPath, testFile.getPath());
+            try(Scanner fs = new Scanner(openFile)) {
+                while (fs.hasNextLine()) {
+                    String data = fs.nextLine();
+                    Pattern p = Pattern.compile(regex);
+                    Matcher m = p.matcher(data);
+                    if (m.matches()) {
+                        String path = m.group(1);
+                        File testFile = new File(concat(basePath, path));
+                        if (testFile.exists() && testFile.isFile()) {
+                            Optional<Vertex> fromQ = graph.getVertices().stream().filter(v -> Objects.equals(v.getPath(), file.getPath())).findFirst();
+                            if (fromQ.isPresent()) {
+                                Vertex from = fromQ.get();
+                                from.addNeighbor(new Vertex(testFile.getPath()));
+                            }
+                        }
                     }
                 }
             }
