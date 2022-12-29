@@ -14,6 +14,10 @@ public final class Resolver {
     DirectedGraph graph;
     ArrayList<String> loops;
 
+    /**
+     * Main solution constructor
+     * @param c Console instance
+     */
     public Resolver(Console c) {
         console = c;
         console.write("Enter base path: ");
@@ -24,6 +28,9 @@ public final class Resolver {
         graph = new DirectedGraph();
     }
 
+    /**
+     * Function to generate graph and check for loops + start writing result
+     */
     public void resolve() {
         File baseFile = new File(basePath);
         if (!baseFile.exists()) {
@@ -71,6 +78,10 @@ public final class Resolver {
         }
     }
 
+    /**
+     * Creates result file based on top-independent vertex
+     * @param v Base vertex
+     */
     private void createResultFile(Vertex v) {
         try {
             File file = new File(resultFile);
@@ -100,6 +111,10 @@ public final class Resolver {
         }
     }
 
+    /**
+     * Wrapper to check for loops and save conflicts to array
+     * @return False if found loops
+     */
     private boolean checkForLoops() {
         var result = graph.hasCycle();
         boolean flag = !result.first();
@@ -109,40 +124,36 @@ public final class Resolver {
         return flag;
     }
 
+    /**
+     * Recursive function to replace 'require' string with file content
+     * @param v Parent vertex
+     * @param writer Writer object of result file
+     * @param idx Index for regex matches
+     */
     private void writeOtherFileContent(Vertex v, FileWriter writer, int idx) {
-        console.writeLine("Recursive call from: " + v.getPath());
         Vertex dep = v.getAdjacencyList().get(idx);
-        console.writeLine("Dep file: " + dep.getPath());
-        if (dep.getAdjacencyList().isEmpty()) {
-            console.writeLine("Empty dep file" + dep.getPath());
-            try (Scanner reader = new Scanner(new File(dep.getPath()))) {
-                while (reader.hasNextLine()) {
-                    writer.write(reader.nextLine() + "\n");
+        try (Scanner reader = new Scanner(new File(dep.getPath()))) {
+            int index = 0;
+            while (reader.hasNextLine()) {
+                String data = reader.nextLine();
+                Pattern p = Pattern.compile(regex);
+                Matcher m = p.matcher(data);
+                if (m.matches()) {
+                    writeOtherFileContent(dep, writer, index);
+                    index++;
+                } else {
+                    writer.write(data + "\n");
                 }
-            } catch (IOException e) {
-                console.writeLine("Failed to create/open file!");
             }
-        } else {
-            try (Scanner reader = new Scanner(new File(dep.getPath()))) {
-                int index = 0;
-                while (reader.hasNextLine()) {
-                    String data = reader.nextLine();
-                    Pattern p = Pattern.compile(regex);
-                    Matcher m = p.matcher(data);
-                    if (m.matches()) {
-                        console.writeLine("Match! => " + dep.getPath());
-                        writeOtherFileContent(dep, writer, index);
-                        index++;
-                    } else {
-                        writer.write(data + "\n");
-                    }
-                }
-            } catch (IOException e) {
-                console.writeLine("Failed to create/open file!");
-            }
+        } catch (IOException e) {
+            console.writeLine("Failed to create/open file!");
         }
     }
 
+    /**
+     * Traverse function to get all files in dirs and sub-dirs
+     * @param files Array of entries in base directory
+     */
     private void traverseFiles(File[] files) {
         for (var file : files) {
             if (file.isDirectory()) {
@@ -154,10 +165,20 @@ public final class Resolver {
         }
     }
 
+    /**
+     * Combines to string with File separator
+     * @param path String 1
+     * @param file String 2
+     * @return Combined string
+     */
     private String concat(String path, String file) {
         return path + File.separator + file;
     }
 
+    /**
+     * Parses file and creates edges in graph based on dependencies
+     * @param file File to parse
+     */
     private void parseFile(Vertex file) {
         File openFile = new File(file.getPath());
         if (!openFile.canRead())
@@ -183,8 +204,6 @@ public final class Resolver {
                     }
                 }
             }
-        } catch (FileNotFoundException ignored) {
-
-        }
+        } catch (FileNotFoundException ignored) {}
     }
 }
