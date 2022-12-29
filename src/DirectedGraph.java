@@ -20,26 +20,26 @@ public final class DirectedGraph {
         return vertices;
     }
 
-    private boolean hasCycle(Vertex src) {
+    private Pair<Boolean, Pair<Vertex, Vertex>> hasCycle(Vertex src) {
         src.setBeingVisited(true);
         for (var n: src.getAdjacencyList()) {
             if (n.isBeingVisited()) {
-                return true;
-            } else if (!n.isVisited() && hasCycle(n)) {
-                return true;
+                return new Pair<>(true, new Pair<>(src, n));
+            } else if (!n.isVisited() && hasCycle(n).first()) {
+                return new Pair<>(true, new Pair<>(src, n));
             }
         }
         src.setBeingVisited(false);
         src.setVisited(true);
-        return false;
+        return new Pair<>(false, new Pair<>(src, src));
     }
 
-    public boolean hasCycle() {
+    public Pair<Boolean, Pair<Vertex, Vertex>> hasCycle() {
         for (var vertex : vertices) {
-            if (!vertex.isVisited() && hasCycle(vertex)) {
-                return true;
+            if (!vertex.isVisited() && hasCycle(vertex).first()) {
+                return hasCycle(vertex);
             }
         }
-        return false;
+        return new Pair<>(false, new Pair<>(null, null));
     }
 }

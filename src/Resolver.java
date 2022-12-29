@@ -48,11 +48,12 @@ public final class Resolver {
             for (var s : loops) {
                 console.writeLine(s);
             }
+            return;
         }
         for (var v: graph.getVertices()) {
             console.write(v.getPath() + " => [");
             for (var n: v.getAdjacencyList()) {
-                console.write(n.getPath() + ", ");
+                console.write(n.getPath() + " [" + n.getAdjacencyList().size() + "], ");
             }
             console.writeLine("]");
         }
@@ -100,13 +101,20 @@ public final class Resolver {
     }
 
     private boolean checkForLoops() {
-        return !graph.hasCycle();
+        var result = graph.hasCycle();
+        boolean flag = !result.first();
+        if (result.first()) {
+            loops.add(result.second().first().getPath() + " with " + result.second().second().getPath());
+        }
+        return flag;
     }
 
     private void writeOtherFileContent(Vertex v, FileWriter writer, int idx) {
         console.writeLine("Recursive call from: " + v.getPath());
         Vertex dep = v.getAdjacencyList().get(idx);
+        console.writeLine("Dep file: " + dep.getPath());
         if (dep.getAdjacencyList().isEmpty()) {
+            console.writeLine("Empty dep file" + dep.getPath());
             try (Scanner reader = new Scanner(new File(dep.getPath()))) {
                 while (reader.hasNextLine()) {
                     writer.write(reader.nextLine() + "\n");
@@ -122,7 +130,7 @@ public final class Resolver {
                     Pattern p = Pattern.compile(regex);
                     Matcher m = p.matcher(data);
                     if (m.matches()) {
-
+                        console.writeLine("Match! => " + dep.getPath());
                         writeOtherFileContent(dep, writer, index);
                         index++;
                     } else {
@@ -164,10 +172,12 @@ public final class Resolver {
                         String path = m.group(1);
                         File testFile = new File(concat(basePath, path));
                         if (testFile.exists() && testFile.isFile()) {
-                            Optional<Vertex> fromQ = graph.getVertices().stream().filter(v -> Objects.equals(v.getPath(), file.getPath())).findFirst();
-                            if (fromQ.isPresent()) {
+                            var fromQ = graph.getVertices().stream().filter(v -> Objects.equals(v.getPath(), file.getPath())).findFirst();
+                            var toQ = graph.getVertices().stream().filter(v -> Objects.equals(v.getPath(), testFile.getPath())).findFirst();
+                            if (fromQ.isPresent() && toQ.isPresent()) {
                                 Vertex from = fromQ.get();
-                                from.addNeighbor(new Vertex(testFile.getPath()));
+                                Vertex to = toQ.get();
+                                graph.addEdge(from, to);
                             }
                         }
                     }
