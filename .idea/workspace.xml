@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="26f2904d-8760-47a8-a056-4daf6a4f2b12" name="Changes" comment="Added javadoc">
+    <list default="true" id="26f2904d-8760-47a8-a056-4daf6a4f2b12" name="Changes" comment="Added another file concat option">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DirectedGraph.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DirectedGraph.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Resolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Resolver.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -84,7 +84,14 @@
       <option name="project" value="LOCAL" />
       <updated>1672349865263</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="Added another file concat option">
+      <created>1673174965899</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1673174965899</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -103,6 +110,7 @@
     <MESSAGE value="Graph support + writing result" />
     <MESSAGE value="Support for finding loops in dependencies" />
     <MESSAGE value="Added javadoc" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added javadoc" />
+    <MESSAGE value="Added another file concat option" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added another file concat option" />
   </component>
 </project>

@@ -5,16 +5,15 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public final class Resolver {
-    Console console;
-    String basePath;
-    boolean isBoringMethod;
-    String resultFile;
-    final String regex = "require ‘(.*)’";
-    DirectedGraph graph;
-    ArrayList<String> loops;
+    private final Console console;
+    private final String basePath;
+    private final boolean isBoringMethod;
+    private final String resultFile;
+    private final String regex = "require ‘(.*)’";
+    private final DirectedGraph graph;
+    private final ArrayList<String> loops;
 
     /**
      * Main solution constructor
@@ -99,7 +98,7 @@ public final class Resolver {
     }
 
     /**
-     * Creates file a boring way - as said in task
+     * Creates file in a boring way - as said in task
      * @param list Sorted list of vertices
      */
     private void createBoringResultFile(List<Vertex> list) {
