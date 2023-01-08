@@ -5,10 +5,12 @@ import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class Resolver {
     Console console;
     String basePath;
+    boolean isBoringMethod;
     String resultFile;
     final String regex = "require ‘(.*)’";
     DirectedGraph graph;
@@ -24,6 +26,14 @@ public final class Resolver {
         basePath = console.readLine();
         console.write("Enter result file name: ");
         resultFile = concat(basePath, console.readLine());
+        console.write("Enter number of method (See README for more details): ");
+        var readValue = console.tryReadInt();
+        while (!readValue.success() || readValue.value() != 0 && readValue.value() != 1) {
+            console.writeLine("Incorrect option!");
+            console.write("Enter number of method (See README for more details): ");
+            readValue = console.tryReadInt();
+        }
+        isBoringMethod = readValue.value() == 0;
         loops = new ArrayList<>();
         graph = new DirectedGraph();
     }
@@ -70,11 +80,49 @@ public final class Resolver {
                 allDependencies.add(n.getPath());
             }
         }
-        for (var v: graph.getVertices()) {
-            if (allDependencies.contains(v.getPath())) {
-                continue;
+        if (isBoringMethod) {
+            var l = graph.sort();
+            console.writeLine("Sorted list:");
+            for (var v : l) {
+                console.writeLine(v.getPath());
             }
-            createResultFile(v);
+            console.writeLine("------------");
+            createBoringResultFile(l);
+        } else {
+            for (var v: graph.getVertices()) {
+                if (allDependencies.contains(v.getPath())) {
+                    continue;
+                }
+                createResultFile(v);
+            }
+        }
+    }
+
+    /**
+     * Creates file a boring way - as said in task
+     * @param list Sorted list of vertices
+     */
+    private void createBoringResultFile(List<Vertex> list) {
+        try {
+            File file = new File(resultFile);
+            if (file.createNewFile()) {
+                console.writeLine("Creating file: " + resultFile);
+            } else {
+                console.writeLine("File already exists: " + resultFile);
+            }
+            try (FileWriter writer = new FileWriter(resultFile)) {
+                for (var v: list) {
+                    File readFile = new File(v.getPath());
+                    try (Scanner reader = new Scanner(readFile)) {
+                        while (reader.hasNextLine()) {
+                            String data = reader.nextLine();
+                            writer.write(data + "\n");
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            console.writeLine("Failed to create/open file!");
         }
     }
 

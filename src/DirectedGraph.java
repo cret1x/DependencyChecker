@@ -1,5 +1,5 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Class for graph to store dependencies
@@ -70,5 +70,22 @@ public final class DirectedGraph {
             }
         }
         return new Pair<>(false, new Pair<>(null, null));
+    }
+
+    /**
+     * Sorts list of vertices based on task
+     * @return Sorted list of vertices
+     */
+    public List<Vertex> sort() {
+        Comparator<Vertex> comparator = (o1, o2) -> {
+            if (o1.getAdjacencyList().contains(o2)) {
+                return 1;
+            } else if (o2.getAdjacencyList().contains(o1)) {
+                return -1;
+            } else {
+                return 0;
+            }
+        };
+        return vertices.stream().sorted(comparator).toList();
     }
 }
