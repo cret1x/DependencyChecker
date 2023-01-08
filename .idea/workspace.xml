@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="26f2904d-8760-47a8-a056-4daf6a4f2b12" name="Changes" comment="Added another file concat option">
+    <list default="true" id="26f2904d-8760-47a8-a056-4daf6a4f2b12" name="Changes" comment="README update + some fixes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Resolver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Resolver.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +90,14 @@
       <option name="project" value="LOCAL" />
       <updated>1673174965899</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="README update + some fixes">
+      <created>1673177215041</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1673177215041</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -111,6 +117,7 @@
     <MESSAGE value="Support for finding loops in dependencies" />
     <MESSAGE value="Added javadoc" />
     <MESSAGE value="Added another file concat option" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added another file concat option" />
+    <MESSAGE value="README update + some fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="README update + some fixes" />
   </component>
 </project>
